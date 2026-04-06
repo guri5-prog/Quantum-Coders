@@ -4,11 +4,20 @@ import subprocess
 import sys
 import tempfile
 
+from ..utils.language_analysis import (
+    detect_generic_bugs,
+    has_python_ast_support,
+    language_extension,
+)
 
-def detect_bugs(code: str):
+
+def detect_bugs(code: str, language="python"):
+    if not has_python_ast_support(language):
+        return detect_generic_bugs(code, language)
+
     backend_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as f:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=language_extension(language)) as f:
         f.write(code.encode())
         filename = f.name
 

@@ -1,5 +1,6 @@
 import ast
 
+from ..utils.language_analysis import detect_generic_dos, has_python_ast_support
 from ..utils.parser import parse_code
 
 
@@ -12,7 +13,10 @@ def _constant_int(node):
     return None
 
 
-def detect_dos(code: str):
+def detect_dos(code: str, language="python"):
+    if not has_python_ast_support(language):
+        return detect_generic_dos(code, language)
+
     tree = parse_code(code)
 
     if not tree:

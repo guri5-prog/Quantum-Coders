@@ -1,8 +1,17 @@
-def calculate_risk(bugs, security, anomalies, dos, code):
-    from ..utils.parser import analyze_ast
+from ..utils.language_analysis import (
+    extract_generic_features,
+    has_python_ast_support,
+    normalize_language,
+)
 
-    ast_result = analyze_ast(code)
-    features = ast_result.get("features", {})
+
+def calculate_risk(bugs, security, anomalies, dos, code, language="python"):
+    if has_python_ast_support(language):
+        from ..utils.parser import analyze_ast
+        ast_result = analyze_ast(code)
+        features = ast_result.get("features", {})
+    else:
+        features = extract_generic_features(code)
 
     score = 0
     reasons = []
@@ -52,7 +61,7 @@ def calculate_risk(bugs, security, anomalies, dos, code):
     if bug_count > 0:
         reasons.append("Static analysis warnings found")
 
-    if any(issue.get("type") == "tool_error" for issue in bugs + security):
+    if any(isinstance(issue, dict) and issue.get("type") == "tool_error" for issue in bugs + security):
         reasons.append("One or more analysis tools could not complete")
 
     score = min(score, 1.0)
@@ -79,5 +88,6 @@ def calculate_risk(bugs, security, anomalies, dos, code):
         "level": level,
         "color": color,
         "reasons": reasons,
-        "features": features
+        "features": features,
+        "language": normalize_language(language),
     }

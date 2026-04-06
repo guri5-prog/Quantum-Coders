@@ -2,8 +2,15 @@ import os
 import subprocess
 import tempfile
 
+from ..utils.language_analysis import has_python_ast_support, language_label
 
-def debug_code(code: str):
+def debug_code(code: str, language="python"):
+    if not has_python_ast_support(language):
+        return {
+            "status": "skipped",
+            "message": f"Runtime debug execution is currently available only for Python. Selected language: {language_label(language)}."
+        }
+
     filename = None
 
     try:

@@ -1,5 +1,6 @@
 import requests
 
+from ..utils.language_analysis import language_label, normalize_language
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = "codellama:7b"
@@ -70,9 +71,11 @@ def _format_findings(items):
     return "\n".join(rendered)
 
 
-def generate_fixed_code(code: str, bugs, security):
+def generate_fixed_code(code: str, bugs, security, language="python"):
+    normalized_language = normalize_language(language)
+    target_language = language_label(normalized_language)
     prompt = f"""
-You are a Python security expert.
+You are a {target_language} security expert.
 
 Fix the given code safely.
 
@@ -84,7 +87,7 @@ STRICT RULES:
 - Keep the solution simple, valid, and safe
 
 OUTPUT:
-- Return Python code only
+- Return {target_language} code only
 
 INPUT CODE:
 {code}
@@ -105,7 +108,7 @@ SECURITY ISSUES:
         }
 
     code_only = extract_code_only(raw_output)
-    safe_code = sanitize_code(code_only)
+    safe_code = sanitize_code(code_only) if normalized_language == "python" else code_only
 
     if not safe_code:
         return {

@@ -1,12 +1,12 @@
 import { API_URL } from '../config.js';
 
-export async function requestAnalysis(code) {
+export async function requestAnalysis(code, language) {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code, language }),
   });
 
   if (!response.ok) {

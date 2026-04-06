@@ -332,6 +332,29 @@ label {
     font-size: 1.4rem;
 }
 
+.language-row {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.language-select {
+    width: 100%;
+    border: 1px solid var(--input-border);
+    border-radius: 14px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 12px 14px;
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+}
+
+.language-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
 .editor-frame {
     border-radius: 24px;
     overflow: hidden;

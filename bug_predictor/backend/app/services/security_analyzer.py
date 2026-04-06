@@ -4,9 +4,17 @@ import subprocess
 import sys
 import tempfile
 
+from ..utils.language_analysis import (
+    detect_generic_security,
+    has_python_ast_support,
+    language_extension,
+)
 
-def analyze_security(code: str):
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as f:
+def analyze_security(code: str, language="python"):
+    if not has_python_ast_support(language):
+        return detect_generic_security(code, language)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=language_extension(language)) as f:
         f.write(code.encode())
         filename = f.name
 

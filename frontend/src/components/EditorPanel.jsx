@@ -1,6 +1,22 @@
 import BugPercentagePanel from './BugPercentagePanel.jsx';
 
-function EditorPanel({ bugPercentage, bugTone, inputCode, isLoading, onAnalyze, onInputChange }) {
+const LANGUAGE_OPTIONS = [
+  { value: 'python', label: 'Python' },
+  { value: 'java', label: 'Java' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'cpp', label: 'C++' },
+];
+
+function EditorPanel({
+  bugPercentage,
+  bugTone,
+  inputCode,
+  isLoading,
+  language,
+  onAnalyze,
+  onInputChange,
+  onLanguageChange,
+}) {
   return (
     <div className="panel editor-panel reveal">
       <div className="panel-header">
@@ -9,6 +25,23 @@ function EditorPanel({ bugPercentage, bugTone, inputCode, isLoading, onAnalyze, 
           <h3>Code Submission</h3>
         </div>
         <span className="panel-badge">Ready</span>
+      </div>
+
+      <div className="language-row">
+        <label htmlFor="languageSelect">Language</label>
+        <select
+          id="languageSelect"
+          className="language-select"
+          value={language}
+          onChange={(event) => onLanguageChange(event.target.value)}
+          disabled={isLoading}
+        >
+          {LANGUAGE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <label htmlFor="inputCode">Enter your code below for analysis</label>
