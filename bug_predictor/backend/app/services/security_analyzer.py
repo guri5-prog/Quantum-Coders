@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 
 
@@ -11,7 +12,7 @@ def analyze_security(code: str):
 
     try:
         result = subprocess.run(
-            ["bandit", "-f", "json", "-r", filename],
+            [sys.executable, "-m", "bandit", "-f", "json", "-r", filename],
             capture_output=True,
             text=True
         )

@@ -55,7 +55,7 @@
     <div class="copyright">&copy; Copyright 2026 | Bug Analyzer</div>
 </body>
 <script>
-    const API_URL = 'http://127.0.0.1:8000/analyze';
+    const API_URL = localStorage.getItem('bugAnalyzerApiUrl') || 'http://127.0.0.1:8000/analyze';
     const submitBtn = document.getElementById('submitBtn');
     const inputCode = document.getElementById('inputCode');
     const bugOutput = document.getElementById('bugOutput');
@@ -99,9 +99,13 @@
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(error.message || 'Submission failed or backend not running.');
+            const friendlyMessage = error.message === 'Failed to fetch'
+                ? `Could not reach the backend at ${API_URL}. Make sure the FastAPI server is running.`
+                : (error.message || 'Submission failed or backend not running.');
+
+            alert(friendlyMessage);
             document.getElementById("valueText").innerText = "Risk Score: 0";
-            bugOutput.value = `Request failed.\nEndpoint: ${API_URL}\nReason: ${error.message || 'Unknown error'}`;
+            bugOutput.value = `Request failed.\nEndpoint: ${API_URL}\nReason: ${friendlyMessage}`;
         }
     });
 

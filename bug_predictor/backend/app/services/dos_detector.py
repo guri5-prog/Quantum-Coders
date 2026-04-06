@@ -1,6 +1,6 @@
 import ast
 
-from app.utils.parser import parse_code
+from ..utils.parser import parse_code
 
 
 LARGE_RANGE_THRESHOLD = 10 ** 7

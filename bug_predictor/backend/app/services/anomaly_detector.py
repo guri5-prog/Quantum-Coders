@@ -1,4 +1,4 @@
-from app.utils.parser import analyze_ast
+from ..utils.parser import analyze_ast
 
 def detect_anomalies(code: str):
     result = analyze_ast(code)

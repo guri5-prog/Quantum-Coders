@@ -1,5 +1,5 @@
 def calculate_risk(bugs, security, anomalies, dos, code):
-    from app.utils.parser import analyze_ast
+    from ..utils.parser import analyze_ast
 
     ast_result = analyze_ast(code)
     features = ast_result.get("features", {})

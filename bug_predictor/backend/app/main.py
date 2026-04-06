@@ -1,14 +1,9 @@
-import os
-import sys
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from app.routes.analyze import router
+from .routes.analyze import router
 
 app = FastAPI(
     title="BugPredictor API",

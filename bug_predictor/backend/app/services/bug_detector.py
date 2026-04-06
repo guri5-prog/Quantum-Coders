@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 
 
@@ -21,7 +22,7 @@ def detect_bugs(code: str):
         )
 
         result = subprocess.run(
-            ["pylint", filename, "--disable=all", "--enable=E,W", "--output-format=json"],
+            [sys.executable, "-m", "pylint", filename, "--disable=all", "--enable=E,W", "--output-format=json"],
             capture_output=True,
             text=True,
             cwd=backend_root,

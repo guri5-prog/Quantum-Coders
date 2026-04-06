@@ -1,19 +1,19 @@
 from fastapi import APIRouter
-from app.services.bug_detector import detect_bugs
-from app.services.security_analyzer import analyze_security
-from app.services.anomaly_detector import detect_anomalies
-from app.services.dos_detector import detect_dos
-from app.services.risk_calculator import calculate_risk
-from app.services.debugger import debug_code
+
+from ..services.anomaly_detector import detect_anomalies
+from ..services.bug_detector import detect_bugs
+from ..services.debugger import debug_code
+from ..services.dos_detector import detect_dos
+from ..services.risk_calculator import calculate_risk
+from ..services.security_analyzer import analyze_security
 
 router = APIRouter()
 
+
 @router.post("/analyze")
 def analyze_code(payload: dict):
-    
-    # ✅ Support BOTH single and multiple inputs
     if "code" in payload:
-        codes = [payload["code"]]   # convert single → list
+        codes = [payload["code"]]
     elif "codes" in payload:
         codes = payload["codes"]
     else:
@@ -22,13 +22,11 @@ def analyze_code(payload: dict):
     results = []
 
     for code in codes:
-        bugs = []
-        security = []
-
+        bugs = detect_bugs(code)
+        security = analyze_security(code)
         anomalies = detect_anomalies(code)
         dos_risk = detect_dos(code)
         debug_result = debug_code(code)
-
         risk = calculate_risk(bugs, security, anomalies, dos_risk, code)
 
         results.append({
@@ -41,7 +39,6 @@ def analyze_code(payload: dict):
             "risk": risk
         })
 
-    # ✅ Return clean response
     return {
         "total_inputs": len(results),
         "results": results
