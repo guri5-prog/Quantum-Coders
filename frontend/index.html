@@ -7,65 +7,198 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body id="main">
-    <div class="nav">
-        <h1 id="title">Bug Analyzer</h1>
-        <button class="buttons" id="mode">Toggle Mode</button>
-    </div>
-    <div class="input">
-        <label>Enter your code here: </label><br>
-        <textarea rows="15" cols="130" id="inputCode" placeholder="Input Code"></textarea>
-        <br>
-        <button class="buttons" id="submitBtn">Analyse</button>
-        <div class="results-layout">
-            <div class="dial-container">
-                <svg id="dial" width="200" height="120" viewBox="0 0 200 120">
-                    <circle cx="100" cy="100" r="80"
-                        stroke="#eee"
-                        stroke-width="10"
-                        fill="none"
-                        stroke-dasharray="502"
-                        stroke-dashoffset="0"
-                        transform="rotate(180 100 100)" />
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="grid-glow"></div>
 
-                    <circle id="progress"
-                        cx="100" cy="100" r="80"
-                        stroke="green"
-                        stroke-width="10"
-                        fill="none"
-                        stroke-dasharray="502"
-                        stroke-dashoffset="0"
-                        stroke-linecap="round"
-                        transform="rotate(180 100 100)" />
-
-                    <line id="needle"
-                        x1="100" y1="100"
-                        x2="100" y2="30"
-                        stroke="black"
-                        stroke-width="3" />
-                </svg>
-                <div id="valueText">Risk Score: 0</div>
+    <div class="page-shell">
+        <header class="topbar reveal">
+            <div>
+                <p class="eyebrow">Predictive security diagnostics</p>
+                <h1 id="title">Bug Analyzer</h1>
             </div>
-
-            <div class="findings-panel">
-                <h2>Detected Issues</h2>
-                <textarea id="bugOutput" readonly placeholder="Detected issues will appear here."></textarea>
+            <div class="topbar-actions">
+                <div class="status-pill">
+                    <span class="status-dot"></span>
+                    <span>Live analysis pipeline</span>
+                </div>
+                <button class="buttons secondary-button" id="mode">Toggle Theme</button>
             </div>
-        </div>
+        </header>
+
+        <main class="dashboard">
+            <section class="hero-card reveal">
+                <div class="hero-copy">
+                    <p class="section-tag">Analysis Workspace</p>
+                    <h2>Inspect code with a more readable, animated risk surface.</h2>
+                    <p class="hero-text">
+                        Paste source code, run analysis, and inspect risk signals through motion-driven feedback and clearer findings.
+                    </p>
+                    <div class="hero-metrics">
+                        <div class="metric-chip">
+                            <span class="metric-label">Latency target</span>
+                            <strong>&lt; 2s UI response</strong>
+                        </div>
+                        <div class="metric-chip">
+                            <span class="metric-label">Output modes</span>
+                            <strong>Risk, bugs, security</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-orbital">
+                    <div class="orbital-ring ring-one"></div>
+                    <div class="orbital-ring ring-two"></div>
+                    <div class="hero-core">
+                        <span>AI</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="workspace">
+                <div class="panel editor-panel reveal">
+                    <div class="panel-header">
+                        <div>
+                            <p class="section-tag">Source Input</p>
+                            <h3>Code Submission</h3>
+                        </div>
+                        <span class="panel-badge">Ready</span>
+                    </div>
+
+                    <label for="inputCode">Enter your code below for analysis</label>
+                    <div class="editor-frame">
+                        <div class="editor-toolbar">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <textarea rows="14" id="inputCode" placeholder="# Your code goes here..." spellcheck="false"></textarea>
+                    </div>
+
+                    <button class="buttons primary-button" id="submitBtn">
+                        <span class="button-shine"></span>
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                        <span id="submitLabel">Analyze Code</span>
+                    </button>
+                </div>
+
+                <div class="results-column">
+                    <section class="panel score-panel reveal">
+                        <div class="panel-header">
+                            <div>
+                                <p class="section-tag">Risk Index</p>
+                                <h3>Threat Dial</h3>
+                            </div>
+                            <span class="panel-badge" id="riskLevelBadge">Idle</span>
+                        </div>
+
+                        <div class="dial-container">
+                            <svg id="dial" width="240" height="150" viewBox="0 0 200 120" aria-hidden="true">
+                                <path class="dial-bg-circle"
+                                    d="M20 100 A80 80 0 0 1 180 100"
+                                    stroke-width="12"
+                                    fill="none"
+                                    stroke-linecap="round" />
+
+                                <path id="progress"
+                                    d="M20 100 A80 80 0 0 1 180 100"
+                                    stroke-width="12"
+                                    fill="none"
+                                    pathLength="100"
+                                    stroke-dasharray="100"
+                                    stroke-dashoffset="100"
+                                    stroke-linecap="round"
+                                    />
+
+                                <line id="needle"
+                                    x1="100" y1="100"
+                                    x2="100" y2="25"
+                                    stroke-width="4" />
+
+                                <circle cx="100" cy="100" r="6" class="dial-center" />
+                            </svg>
+                            <div class="value-stack">
+                                <div id="valueText">Risk Score: 0</div>
+                                <p id="valueCaption">Waiting for analysis input.</p>
+                            </div>
+                        </div>
+
+                        <div class="mini-stats">
+                            <article class="stat-card">
+                                <span class="stat-label">Risk band</span>
+                                <strong id="riskBand">Low</strong>
+                            </article>
+                            <article class="stat-card">
+                                <span class="stat-label">Signals found</span>
+                                <strong id="signalCount">0</strong>
+                            </article>
+                            <article class="stat-card">
+                                <span class="stat-label">Engine state</span>
+                                <strong id="engineState">Standby</strong>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="panel findings-panel reveal">
+                        <div class="panel-header">
+                            <div>
+                                <p class="section-tag">Detection Summary</p>
+                                <h3>Detected Findings</h3>
+                            </div>
+                            <span class="panel-badge">Structured</span>
+                        </div>
+
+                        <div class="findings-meta">
+                            <div class="meta-card">
+                                <span>Total categories</span>
+                                <strong id="categoryCount">0</strong>
+                            </div>
+                            <div class="meta-card">
+                                <span>Current mode</span>
+                                <strong id="analysisState">Idle</strong>
+                            </div>
+                        </div>
+
+                        <textarea id="bugOutput" readonly placeholder="Detailed breakdown of detected issues will appear here..."></textarea>
+                    </section>
+                </div>
+            </section>
+        </main>
+
+        <footer class="copyright">2026 Bug Analyzer. Built for secure code.</footer>
     </div>
-    <div class="copyright">&copy; Copyright 2026 | Bug Analyzer</div>
 </body>
 <script>
     const API_URL = localStorage.getItem('bugAnalyzerApiUrl') || 'http://127.0.0.1:8000/analyze';
     const submitBtn = document.getElementById('submitBtn');
+    const submitLabel = document.getElementById('submitLabel');
     const inputCode = document.getElementById('inputCode');
     const bugOutput = document.getElementById('bugOutput');
+    const valueText = document.getElementById('valueText');
+    const valueCaption = document.getElementById('valueCaption');
+    const riskLevelBadge = document.getElementById('riskLevelBadge');
+    const riskBand = document.getElementById('riskBand');
+    const signalCount = document.getElementById('signalCount');
+    const engineState = document.getElementById('engineState');
+    const categoryCount = document.getElementById('categoryCount');
+    const analysisState = document.getElementById('analysisState');
+    const needle = document.getElementById('needle');
+    const progress = document.getElementById('progress');
+    const body = document.getElementById('main');
 
     let currentValue = 0;
 
     submitBtn.addEventListener('click', async () => {
-        const userCode = inputCode.value;
-        document.getElementById("valueText").innerText = "Analyzing...";
-        bugOutput.value = "Analyzing code and collecting findings...";
+        const userCode = inputCode.value.trim();
+
+        if (!userCode) {
+            bugOutput.value = 'Paste code before starting analysis.';
+            valueCaption.innerText = 'Submission blocked until source input is provided.';
+            return;
+        }
+
+        setLoadingState(true);
 
         try {
             const response = await fetch(API_URL, {
@@ -81,8 +214,6 @@
             }
 
             const result = await response.json();
-            console.log('Server response:', result);
-
             const analysis = result.results?.[0];
             const riskValue = analysis?.risk?.percentage;
 
@@ -93,46 +224,69 @@
             animateValue(currentValue, riskValue);
             currentValue = riskValue;
             bugOutput.value = formatFindings(analysis);
-
-            if (analysis.risk.level === 'HIGH') {
-                console.warn(analysis.risk.reasons);
-            }
+            applyAnalysisSummary(analysis);
+            setLoadingState(false, analysis);
         } catch (error) {
-            console.error('Error:', error);
             const friendlyMessage = error.message === 'Failed to fetch'
                 ? `Could not reach the backend at ${API_URL}. Make sure the FastAPI server is running.`
                 : (error.message || 'Submission failed or backend not running.');
 
             alert(friendlyMessage);
-            document.getElementById("valueText").innerText = "Risk Score: 0";
+            currentValue = 0;
+            updateDial(0);
             bugOutput.value = `Request failed.\nEndpoint: ${API_URL}\nReason: ${friendlyMessage}`;
+            valueCaption.innerText = 'Analysis failed before a valid response was returned.';
+            riskLevelBadge.innerText = 'Error';
+            riskBand.innerText = 'Unavailable';
+            signalCount.innerText = '0';
+            engineState.innerText = 'Offline';
+            categoryCount.innerText = '0';
+            analysisState.innerText = 'Failed';
+            body.dataset.risk = 'high';
+            setLoadingState(false);
         }
     });
 
-    document.getElementById("mode").addEventListener("click", function() {
-        document.getElementById("main").classList.toggle("dark");
+    document.getElementById('mode').addEventListener('click', () => {
+        body.classList.toggle('dark');
     });
 
-    const needle = document.getElementById("needle");
-    const progress = document.getElementById("progress");
+    function setLoadingState(isLoading, analysis) {
+        submitBtn.disabled = isLoading;
+        submitLabel.innerText = isLoading ? 'Analyzing...' : 'Analyze Code';
+        body.classList.toggle('is-loading', isLoading);
 
-    function animateValue(start, end, duration = 1500) {
+        if (isLoading) {
+            valueText.innerText = 'Risk Score: ...';
+            valueCaption.innerText = 'Running parser, detectors, and scoring engine.';
+            bugOutput.value = 'Analyzing code and collecting findings...';
+            riskLevelBadge.innerText = 'Running';
+            analysisState.innerText = 'Processing';
+            engineState.innerText = 'Scanning';
+            return;
+        }
+
+        if (!analysis) {
+            engineState.innerText = 'Standby';
+        }
+    }
+
+    function animateValue(start, end, duration = 1800) {
         let startTime = null;
 
         function easeInOut(t) {
             return t < 0.5
-                ? 2 * t * t
-                : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                ? 4 * t * t * t
+                : 1 - Math.pow(-2 * t + 2, 3) / 2;
         }
 
         function animation(currentTime) {
             if (!startTime) startTime = currentTime;
 
             const progressTime = currentTime - startTime;
-            let percent = Math.min(progressTime / duration, 1);
-            percent = easeInOut(percent);
-
+            const percent = easeInOut(Math.min(progressTime / duration, 1));
             const value = start + (end - start) * percent;
+
             updateDial(value);
 
             if (progressTime < duration) {
@@ -146,16 +300,61 @@
     function updateDial(value) {
         const percent = Math.max(0, Math.min(1, value / 100));
         const angle = percent * 180 - 90;
+        const dashOffset = 100 - (100 * percent);
+        const tone = getRiskTone(value);
+
         needle.style.transform = `rotate(${angle}deg)`;
+        progress.style.stroke = tone.color;
+        progress.style.strokeDashoffset = dashOffset;
+        needle.style.stroke = tone.color;
 
-        let color;
-        if (value < 40) color = 'green';
-        else if (value < 70) color = 'orange';
-        else color = 'red';
+        body.dataset.risk = tone.level.toLowerCase();
+        valueText.innerText = `Risk Score: ${Math.round(value)}`;
+        valueCaption.innerText = tone.caption;
+        riskBand.innerText = tone.level;
+    }
 
-        progress.style.stroke = color;
-        needle.style.stroke = color;
-        document.getElementById("valueText").innerText = "Risk Score: " + Math.round(value);
+    function getRiskTone(value) {
+        if (value < 40) {
+            return {
+                level: 'Low',
+                color: '#22c55e',
+                caption: 'Low-exposure patterns dominate the current submission.'
+            };
+        }
+
+        if (value < 70) {
+            return {
+                level: 'Medium',
+                color: '#f59e0b',
+                caption: 'Moderate issues detected. Review before shipping.'
+            };
+        }
+
+        return {
+            level: 'High',
+            color: '#ef4444',
+            caption: 'Elevated risk detected across multiple analysis signals.'
+        };
+    }
+
+    function applyAnalysisSummary(analysis) {
+        const totals = {
+            bugs: (analysis.bugs || []).length,
+            security: (analysis.security || []).length,
+            anomalies: (analysis.anomalies || []).length,
+            dos: (analysis.dos_risk || []).length
+        };
+
+        const totalSignals = totals.bugs + totals.security + totals.anomalies + totals.dos;
+        const categories = Object.values(totals).filter((count) => count > 0).length;
+        const level = analysis.risk?.level || 'UNKNOWN';
+
+        riskLevelBadge.innerText = level;
+        signalCount.innerText = String(totalSignals);
+        engineState.innerText = totalSignals > 0 ? 'Flagged' : 'Clear';
+        categoryCount.innerText = String(categories);
+        analysisState.innerText = totalSignals > 0 ? 'Complete' : 'Clean';
     }
 
     function formatFindings(analysis) {
