@@ -53,6 +53,10 @@ def detect_bugs(code: str, language="python"):
             for message in messages
         ]
     except (json.JSONDecodeError, FileNotFoundError, OSError) as exc:
+        fallback = detect_generic_bugs(code, language)
+        if fallback:
+            fallback.append({"type": "tool_error", "message": str(exc)})
+            return fallback
         return [{"type": "tool_error", "message": str(exc)}]
     finally:
         if os.path.exists(filename):

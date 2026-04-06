@@ -40,6 +40,10 @@ def analyze_security(code: str, language="python"):
             for issue in report.get("results", [])
         ]
     except (json.JSONDecodeError, FileNotFoundError, OSError) as exc:
+        fallback = detect_generic_security(code, language)
+        if fallback:
+            fallback.append({"type": "tool_error", "message": str(exc)})
+            return fallback
         return [{"type": "tool_error", "message": str(exc)}]
     finally:
         if os.path.exists(filename):

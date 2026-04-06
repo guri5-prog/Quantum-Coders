@@ -18,7 +18,7 @@ def ask_llm(prompt):
                     "num_predict": 2048
                 }
             },
-            timeout=60
+            timeout=300
         )
 
         response.raise_for_status()

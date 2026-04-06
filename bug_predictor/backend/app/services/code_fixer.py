@@ -1,4 +1,5 @@
 import requests
+import re
 
 from ..utils.language_analysis import language_label, normalize_language
 
@@ -71,6 +72,36 @@ def _format_findings(items):
     return "\n".join(rendered)
 
 
+def _validate_fixed_code(code: str, language: str):
+    common_rules = [
+        (r"\beval\s*\(", "Use of eval() is unsafe."),
+        (r"\bexec\s*\(", "Use of exec() is unsafe."),
+        (r"\bos\.system\s*\(", "Use of os.system() is unsafe."),
+        (r"\bRuntime\.getRuntime\(\)\.exec\s*\(", "Runtime command execution is unsafe."),
+        (r"\b(gets|strcpy|sprintf)\s*\(", "Unsafe C/C++ APIs detected."),
+    ]
+
+    language_rules = {
+        "python": [
+            (r"\bsubprocess\.(run|Popen|call|check_output)\s*\([^)]*shell\s*=\s*True", "Shell execution in subprocess is unsafe."),
+        ],
+        "javascript": [
+            (r"\bchild_process\.(exec|execSync)\s*\(", "Node child_process exec sink detected."),
+        ],
+        "cpp": [
+            (r"\bsystem\s*\(", "C/C++ system() command execution is unsafe."),
+            (r"\bpopen\s*\(", "C/C++ popen() command execution is unsafe."),
+        ],
+    }
+
+    violations = []
+    combined_rules = common_rules + language_rules.get(language, [])
+    for pattern, message in combined_rules:
+        if re.search(pattern, code, flags=re.IGNORECASE | re.MULTILINE):
+            violations.append(message)
+    return violations
+
+
 def generate_fixed_code(code: str, bugs, security, language="python"):
     normalized_language = normalize_language(language)
     target_language = language_label(normalized_language)
@@ -115,6 +146,14 @@ SECURITY ISSUES:
             "code": "",
             "status": "empty",
             "message": "The fixer did not return usable code."
+        }
+
+    violations = _validate_fixed_code(safe_code, normalized_language)
+    if violations:
+        return {
+            "code": "",
+            "status": "rejected_unsafe",
+            "message": "Generated fix failed safety validation: " + "; ".join(violations),
         }
 
     return {
