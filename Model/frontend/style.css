@@ -1,0 +1,69 @@
+body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.dark{
+    color: white;
+    background-color: #181818;
+    text-decoration: none;
+}
+body.dark {
+    background-color: #181818;
+    color: white;
+}
+
+body.dark * {
+    color: white;
+    background-color: transparent;
+}
+body.dark textarea,
+body.dark button {
+    background-color: #222;
+    color: white;
+    border: 1px solid #555;
+}
+.nav{
+    margin-top: 75px;
+    margin-left: 70px;
+    margin-right: 70px;
+    margin-bottom: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;   
+}
+#title{
+    margin: 0 auto;
+}
+#mode{
+    position: absolute;
+    right: 10px;
+}
+.buttons{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: grid;
+    border: rgba(0, 0, 0, 0.05), 2px, solid;
+    border-radius: 100px;
+    width:100px;
+    height: 40px;
+    text-align: center;
+    place-items: center;
+}
+.input{
+    margin-left: 50px;
+}
+#needle {
+    transform-origin: 100px 100px;
+    transition: transform 0.4s ease-in-out;
+}
+.copyright{
+    display: grid;
+    place-items: center;
+    margin-top: 70px;
+}
+.dial-container{
+    display: grid;
+    place-items: center;
+}
+#dial {
+    width: 400px;
+    height: auto;
+}
