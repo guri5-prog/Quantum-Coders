@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from ..services.anomaly_detector import detect_anomalies
 from ..services.bug_detector import detect_bugs
+from ..services.code_fixer import generate_fixed_code
 from ..services.debugger import debug_code
 from ..services.dos_detector import detect_dos
 from ..services.risk_calculator import calculate_risk
@@ -28,6 +29,7 @@ def analyze_code(payload: dict):
         dos_risk = detect_dos(code)
         debug_result = debug_code(code)
         risk = calculate_risk(bugs, security, anomalies, dos_risk, code)
+        fixed_code = generate_fixed_code(code, bugs, security)
 
         results.append({
             "input_code": code,
@@ -36,6 +38,7 @@ def analyze_code(payload: dict):
             "anomalies": anomalies,
             "dos_risk": dos_risk,
             "debug": debug_result,
+            "fixed_code": fixed_code,
             "risk": risk
         })
 

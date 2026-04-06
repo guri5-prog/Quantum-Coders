@@ -22,7 +22,7 @@
                     <span class="status-dot"></span>
                     <span>Live analysis pipeline</span>
                 </div>
-                <button class="buttons secondary-button" id="mode">Toggle Theme</button>
+                <button type="button" class="buttons secondary-button" id="mode">Toggle Theme</button>
             </div>
         </header>
 
@@ -74,7 +74,7 @@
                         <textarea rows="14" id="inputCode" placeholder="# Your code goes here..." spellcheck="false"></textarea>
                     </div>
 
-                    <button class="buttons primary-button" id="submitBtn">
+                    <button type="button" class="buttons primary-button" id="submitBtn">
                         <span class="button-shine"></span>
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
@@ -162,6 +162,18 @@
 
                         <textarea id="bugOutput" readonly placeholder="Detailed breakdown of detected issues will appear here..."></textarea>
                     </section>
+
+                    <section class="panel findings-panel reveal">
+                        <div class="panel-header">
+                            <div>
+                                <p class="section-tag">Repair Output</p>
+                                <h3>Fixed Code</h3>
+                            </div>
+                            <span class="panel-badge" id="fixStatusBadge">Idle</span>
+                        </div>
+
+                        <textarea id="fixedCodeOutput" readonly placeholder="Generated fixed code will appear here..."></textarea>
+                    </section>
                 </div>
             </section>
         </main>
@@ -175,6 +187,7 @@
     const submitLabel = document.getElementById('submitLabel');
     const inputCode = document.getElementById('inputCode');
     const bugOutput = document.getElementById('bugOutput');
+    const fixedCodeOutput = document.getElementById('fixedCodeOutput');
     const valueText = document.getElementById('valueText');
     const valueCaption = document.getElementById('valueCaption');
     const riskLevelBadge = document.getElementById('riskLevelBadge');
@@ -183,13 +196,15 @@
     const engineState = document.getElementById('engineState');
     const categoryCount = document.getElementById('categoryCount');
     const analysisState = document.getElementById('analysisState');
+    const fixStatusBadge = document.getElementById('fixStatusBadge');
     const needle = document.getElementById('needle');
     const progress = document.getElementById('progress');
     const body = document.getElementById('main');
 
     let currentValue = 0;
 
-    submitBtn.addEventListener('click', async () => {
+    submitBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
         const userCode = inputCode.value.trim();
 
         if (!userCode) {
@@ -224,6 +239,7 @@
             animateValue(currentValue, riskValue);
             currentValue = riskValue;
             bugOutput.value = formatFindings(analysis);
+            fixedCodeOutput.value = formatFixedCode(analysis);
             applyAnalysisSummary(analysis);
             setLoadingState(false, analysis);
         } catch (error) {
@@ -235,8 +251,10 @@
             currentValue = 0;
             updateDial(0);
             bugOutput.value = `Request failed.\nEndpoint: ${API_URL}\nReason: ${friendlyMessage}`;
+            fixedCodeOutput.value = 'Fixed code could not be generated because the analysis request failed.';
             valueCaption.innerText = 'Analysis failed before a valid response was returned.';
             riskLevelBadge.innerText = 'Error';
+            fixStatusBadge.innerText = 'Unavailable';
             riskBand.innerText = 'Unavailable';
             signalCount.innerText = '0';
             engineState.innerText = 'Offline';
@@ -247,7 +265,8 @@
         }
     });
 
-    document.getElementById('mode').addEventListener('click', () => {
+    document.getElementById('mode').addEventListener('click', (event) => {
+        event.preventDefault();
         body.classList.toggle('dark');
     });
 
@@ -260,7 +279,9 @@
             valueText.innerText = 'Risk Score: ...';
             valueCaption.innerText = 'Running parser, detectors, and scoring engine.';
             bugOutput.value = 'Analyzing code and collecting findings...';
+            fixedCodeOutput.value = 'Generating safer replacement code...';
             riskLevelBadge.innerText = 'Running';
+            fixStatusBadge.innerText = 'Generating';
             analysisState.innerText = 'Processing';
             engineState.innerText = 'Scanning';
             return;
@@ -349,8 +370,10 @@
         const totalSignals = totals.bugs + totals.security + totals.anomalies + totals.dos;
         const categories = Object.values(totals).filter((count) => count > 0).length;
         const level = analysis.risk?.level || 'UNKNOWN';
+        const fixStatus = analysis.fixed_code?.status || 'idle';
 
         riskLevelBadge.innerText = level;
+        fixStatusBadge.innerText = fixStatus.charAt(0).toUpperCase() + fixStatus.slice(1);
         signalCount.innerText = String(totalSignals);
         engineState.innerText = totalSignals > 0 ? 'Flagged' : 'Clear';
         categoryCount.innerText = String(categories);
@@ -386,6 +409,20 @@
         }
 
         return rendered.join('\n\n');
+    }
+
+    function formatFixedCode(analysis) {
+        const fixed = analysis.fixed_code;
+
+        if (!fixed) {
+            return 'No fixed code was returned by the backend.';
+        }
+
+        if (fixed.code) {
+            return fixed.code;
+        }
+
+        return fixed.message || 'Fixed code is currently unavailable.';
     }
 
     function formatStructuredIssue(issue) {
