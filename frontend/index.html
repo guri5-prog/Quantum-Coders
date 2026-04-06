@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABCD</title>
+    <title>Bug Analyzer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body id="main">
     <div class="nav">
-        <h1 id="title">ABCD</h1>
+        <h1 id="title">Bug Analyzer</h1>
         <button class="buttons" id="mode">Toggle Mode</button>
     </div>
     <div class="input">
@@ -16,124 +16,119 @@
         <textarea rows="15" cols="130" id="inputCode" placeholder="Input Code"></textarea>
         <br>
         <button class="buttons" id="submitBtn">Analyse</button>
-        <div class="dial-container">
-            <svg id="dial" width="200" height="120" viewBox="0 0 200 120">
+        <div class="results-layout">
+            <div class="dial-container">
+                <svg id="dial" width="200" height="120" viewBox="0 0 200 120">
+                    <circle cx="100" cy="100" r="80"
+                        stroke="#eee"
+                        stroke-width="10"
+                        fill="none"
+                        stroke-dasharray="502"
+                        stroke-dashoffset="0"
+                        transform="rotate(180 100 100)" />
 
-                <!-- background arc -->
-                <circle cx="100" cy="100" r="80"
-                    stroke="#eee"
-                    stroke-width="10"
-                    fill="none"
-                    stroke-dasharray="502"
-                    stroke-dashoffset="0"
-                    transform="rotate(180 100 100)" />
+                    <circle id="progress"
+                        cx="100" cy="100" r="80"
+                        stroke="green"
+                        stroke-width="10"
+                        fill="none"
+                        stroke-dasharray="502"
+                        stroke-dashoffset="0"
+                        stroke-linecap="round"
+                        transform="rotate(180 100 100)" />
 
-                <!-- progress arc -->
-                <circle id="progress"
-                    cx="100" cy="100" r="80"
-                    stroke="green"
-                    stroke-width="10"
-                    fill="none"
-                    stroke-dasharray="502"
-                    stroke-dashoffset="0"
-                    stroke-linecap="round"
-                    transform="rotate(180 100 100)"
-                    transform-origin: center; />
+                    <line id="needle"
+                        x1="100" y1="100"
+                        x2="100" y2="30"
+                        stroke="black"
+                        stroke-width="3" />
+                </svg>
+                <div id="valueText">Risk Score: 0</div>
+            </div>
 
-                <!-- needle -->
-                <line id="needle"
-                    x1="100" y1="100"
-                    x2="100" y2="30"
-                    stroke="black"
-                    stroke-width="3" />
-
-            </svg>
-            <div id="valueText">Risk Score: 0</div>
+            <div class="findings-panel">
+                <h2>Detected Issues</h2>
+                <textarea id="bugOutput" readonly placeholder="Detected issues will appear here."></textarea>
+            </div>
         </div>
     </div>
-    <div class="copyright">&copy; Copyright 2026 | ABCD</div>
+    <div class="copyright">&copy; Copyright 2026 | Bug Analyzer</div>
 </body>
 <script>
+    const API_URL = 'http://127.0.0.1:8000/analyze';
     const submitBtn = document.getElementById('submitBtn');
-    const inputCode= document.getElementById('inputCode');
+    const inputCode = document.getElementById('inputCode');
+    const bugOutput = document.getElementById('bugOutput');
 
-    //uncomment this code to get values from backend
-    // submitBtn.addEventListener('click', async () => {
-    //     const userCode = inputCode.value;
-
-    //     try {
-    //         const response = await fetch('https://your-backend-api.com/process', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify({ code: userCode })
-    //         });
-
-    //         const result = await response.json();
-    //         console.log('Server response:', result);
-
-    //         // assume backend returns: { risk: 75 }
-    //         const riskValue = result.risk;
-
-    //         // animate dial
-    //         animateValue(0, riskValue);
-    //     } catch (error) {
-    //         console.error('Error:', error);
-    //         alert('Submission failed.');
-    //     }
-    // });
-
-
-    //demo value code
     let currentValue = 0;
 
-    submitBtn.addEventListener('click', () => {
-        // generate random value (0–100)
-        const fakeValue = Math.floor(Math.random() * 100);
+    submitBtn.addEventListener('click', async () => {
+        const userCode = inputCode.value;
+        document.getElementById("valueText").innerText = "Analyzing...";
+        bugOutput.value = "Analyzing code and collecting findings...";
 
-        console.log("Demo Risk Value:", fakeValue);
-
-        // animate dial
-        animateValue(currentValue, fakeValue);
-
-        currentValue = fakeValue;
-    });
-    //demo value code ends
-
-    //code for dark mode
-    document.getElementById("mode").addEventListener("click", function(){
-                document.getElementById("main").classList.toggle("dark");
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: userCode })
             });
 
-    
-    //dial code
+            if (!response.ok) {
+                throw new Error(`Backend request failed with status ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Server response:', result);
+
+            const analysis = result.results?.[0];
+            const riskValue = analysis?.risk?.percentage;
+
+            if (typeof riskValue !== 'number') {
+                throw new Error(result.error || 'Backend returned an unexpected response.');
+            }
+
+            animateValue(currentValue, riskValue);
+            currentValue = riskValue;
+            bugOutput.value = formatFindings(analysis);
+
+            if (analysis.risk.level === 'HIGH') {
+                console.warn(analysis.risk.reasons);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message || 'Submission failed or backend not running.');
+            document.getElementById("valueText").innerText = "Risk Score: 0";
+            bugOutput.value = `Request failed.\nEndpoint: ${API_URL}\nReason: ${error.message || 'Unknown error'}`;
+        }
+    });
+
+    document.getElementById("mode").addEventListener("click", function() {
+        document.getElementById("main").classList.toggle("dark");
+    });
+
     const needle = document.getElementById("needle");
     const progress = document.getElementById("progress");
 
-    const MIN = 0;
-    const MAX = 100;
+    function animateValue(start, end, duration = 1500) {
+        let startTime = null;
 
-    function animateValue(start, end, duration = 1500) { // ⬅️ longer duration
-    let startTime = null;
+        function easeInOut(t) {
+            return t < 0.5
+                ? 2 * t * t
+                : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
 
-    function easeInOut(t) {
-        return t < 0.5
-            ? 2 * t * t
-            : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    }
-
-    function animation(currentTime) {
+        function animation(currentTime) {
             if (!startTime) startTime = currentTime;
 
             const progressTime = currentTime - startTime;
             let percent = Math.min(progressTime / duration, 1);
-
-            // 🎯 apply easing
             percent = easeInOut(percent);
 
             const value = start + (end - start) * percent;
-
             updateDial(value);
 
             if (progressTime < duration) {
@@ -144,22 +139,57 @@
         requestAnimationFrame(animation);
     }
 
-    //update color function
     function updateDial(value) {
         const percent = Math.max(0, Math.min(1, value / 100));
-
-        // 🎯 Needle moves
         const angle = percent * 180 - 90;
         needle.style.transform = `rotate(${angle}deg)`;
 
         let color;
-        if (value < 40) color = "green";
-        else if (value < 70) color = "orange";
-        else color = "red";
+        if (value < 40) color = 'green';
+        else if (value < 70) color = 'orange';
+        else color = 'red';
 
         progress.style.stroke = color;
         needle.style.stroke = color;
-        document.getElementById("valueText").innerText = "Risk Score: "+Math.round(value);
+        document.getElementById("valueText").innerText = "Risk Score: " + Math.round(value);
+    }
+
+    function formatFindings(analysis) {
+        const sections = [
+            {
+                title: 'Bug Warnings',
+                items: (analysis.bugs || []).map((bug) => formatStructuredIssue(bug))
+            },
+            {
+                title: 'Security Issues',
+                items: (analysis.security || []).map((issue) => formatStructuredIssue(issue))
+            },
+            {
+                title: 'Anomalies',
+                items: (analysis.anomalies || []).map((issue) => formatStructuredIssue(issue))
+            },
+            {
+                title: 'DoS Risks',
+                items: (analysis.dos_risk || []).map((issue) => `- ${issue}`)
+            }
+        ];
+
+        const rendered = sections
+            .filter((section) => section.items.length > 0)
+            .map((section) => `${section.title}:\n${section.items.join('\n')}`);
+
+        if (rendered.length === 0) {
+            return 'No bugs or risky patterns were detected for this code.';
+        }
+
+        return rendered.join('\n\n');
+    }
+
+    function formatStructuredIssue(issue) {
+        const message = issue.message || issue.type || 'Issue detected';
+        const line = issue.line ? `Line ${issue.line}` : 'Line unknown';
+        const detail = issue.symbol ? ` (${issue.symbol})` : '';
+        return `- ${line}: ${message}${detail}`;
     }
 </script>
 </html>

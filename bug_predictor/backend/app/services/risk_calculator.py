@@ -1,5 +1,4 @@
 def calculate_risk(bugs, security, anomalies, dos, code):
-
     from app.utils.parser import analyze_ast
 
     ast_result = analyze_ast(code)
@@ -8,16 +7,16 @@ def calculate_risk(bugs, security, anomalies, dos, code):
     score = 0
     reasons = []
 
-    # -------------------------------
-    # 🔐 1. SECURITY ISSUES (HIGH PRIORITY)
-    # -------------------------------
-    if len(security) > 0:
+    bug_count = sum(1 for issue in bugs if issue.get("type") != "tool_error")
+    security_count = sum(1 for issue in security if issue.get("type") != "tool_error")
+    anomaly_count = len(anomalies)
+    dos_count = len(dos)
+    has_findings = any([bug_count, security_count, anomaly_count, dos_count])
+
+    if security_count > 0:
         score += 0.5
         reasons.append("Security vulnerabilities detected")
 
-    # -------------------------------
-    # 🧠 2. ANOMALY SEVERITY-BASED SCORING
-    # -------------------------------
     for issue in anomalies:
         severity = issue.get("severity", "LOW")
 
@@ -28,42 +27,39 @@ def calculate_risk(bugs, security, anomalies, dos, code):
         else:
             score += 0.1
 
-    if len(anomalies) > 0:
+    if anomalies:
         reasons.append("Unsafe coding patterns found")
 
-    # -------------------------------
-    # 💥 3. DOS RISK (CRITICAL)
-    # -------------------------------
-    if len(dos) > 0:
-        score = max(score, 0.85)   # 🔥 force HIGH risk
+    if dos_count > 0:
+        score = max(score, 0.85)
+        reasons.append("Potential denial-of-service pattern detected")
 
-    # -------------------------------
-    # 🧬 4. CODE COMPLEXITY
-    # -------------------------------
     complexity_score = (
         features.get("functions", 0) * 0.05 +
         features.get("loops", 0) * 0.1 +
         features.get("assignments", 0) * 0.02
     )
 
-    score += complexity_score
+    if has_findings:
+        complexity_impact = min(complexity_score * 0.25, 0.15)
+        score += complexity_impact
 
-    if complexity_score > 0.3:
-        reasons.append("High code complexity")
+        if complexity_score > 0.6:
+            reasons.append("High code complexity may increase maintenance risk")
 
-    # -------------------------------
-    # 🐞 5. BUGS (LOW IMPACT)
-    # -------------------------------
-    score += len(bugs) * 0.1
+    score += min(bug_count * 0.1, 0.3)
 
-    # -------------------------------
-    # 🔒 NORMALIZE SCORE
-    # -------------------------------
+    if bug_count > 0:
+        reasons.append("Static analysis warnings found")
+
+    if any(issue.get("type") == "tool_error" for issue in bugs + security):
+        reasons.append("One or more analysis tools could not complete")
+
     score = min(score, 1.0)
 
-    # -------------------------------
-    # 🎯 RISK LEVEL CLASSIFICATION
-    # -------------------------------
+    if not has_findings:
+        score = min(score, 0.25)
+
     if score >= 0.75:
         level = "HIGH"
         color = "RED"
@@ -74,9 +70,6 @@ def calculate_risk(bugs, security, anomalies, dos, code):
         level = "LOW"
         color = "GREEN"
 
-    # -------------------------------
-    # 🧠 ADD SMART EXPLANATION
-    # -------------------------------
     if not reasons:
         reasons.append("No major risks detected")
 

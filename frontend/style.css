@@ -1,11 +1,13 @@
-body{
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.dark{
+
+.dark {
     color: white;
     background-color: #181818;
     text-decoration: none;
 }
+
 body.dark {
     background-color: #181818;
     color: white;
@@ -15,55 +17,99 @@ body.dark * {
     color: white;
     background-color: transparent;
 }
+
 body.dark textarea,
 body.dark button {
     background-color: #222;
     color: white;
     border: 1px solid #555;
 }
-.nav{
+
+.nav {
     margin-top: 75px;
     margin-left: 70px;
     margin-right: 70px;
     margin-bottom: 75px;
     display: flex;
     align-items: center;
-    justify-content: space-between;   
+    justify-content: space-between;
 }
-#title{
+
+#title {
     margin: 0 auto;
 }
-#mode{
+
+#mode {
     position: absolute;
     right: 10px;
 }
-.buttons{
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+.buttons {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: grid;
     border: rgba(0, 0, 0, 0.05), 2px, solid;
     border-radius: 100px;
-    width:100px;
+    width: 100px;
     height: 40px;
     text-align: center;
     place-items: center;
 }
-.input{
+
+.input {
     margin-left: 50px;
+    margin-right: 50px;
 }
+
+.results-layout {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
 #needle {
     transform-origin: 100px 100px;
     transition: transform 0.4s ease-in-out;
 }
-.copyright{
+
+.copyright {
     display: grid;
     place-items: center;
     margin-top: 70px;
 }
-.dial-container{
+
+.dial-container {
     display: grid;
     place-items: center;
+    min-width: 420px;
 }
+
 #dial {
     width: 400px;
     height: auto;
+}
+
+.findings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 520px;
+    width: 100%;
+}
+
+.findings-panel h2 {
+    margin: 0;
+}
+
+#bugOutput {
+    min-height: 320px;
+    width: 100%;
+    padding: 14px;
+    resize: vertical;
+    border: 1px solid #bbb;
+    border-radius: 12px;
+    background-color: #f7f7f7;
+    color: #111;
+    line-height: 1.5;
 }
