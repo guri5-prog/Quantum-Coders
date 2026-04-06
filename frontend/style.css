@@ -74,7 +74,7 @@ body::before {
 
 body.is-loading .panel,
 body.is-loading .hero-card {
-    animation: pulsePanel 1.8s ease-in-out infinite;
+    filter: saturate(1.05);
 }
 
 .ambient,
@@ -411,6 +411,27 @@ textarea:focus {
     box-shadow: 0 20px 34px rgba(166, 60, 6, 0.24);
 }
 
+.bug-percentage-card {
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: var(--shadow-soft);
+}
+
+.bug-percentage-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+.bug-percentage-header h3 {
+    font-size: 1.15rem;
+}
+
 .secondary-button {
     background: rgba(255, 255, 255, 0.24);
     color: var(--text-color);
@@ -432,14 +453,23 @@ textarea:focus {
     gap: 18px;
 }
 
-#dial {
+.dial {
     overflow: visible;
     filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.1));
     display: block;
     margin-bottom: 4px;
 }
 
-#dial path {
+.compact-dial {
+    gap: 8px;
+}
+
+.compact-dial .dial {
+    width: min(100%, 210px);
+    height: auto;
+}
+
+.dial path {
     transition: stroke 0.35s ease, stroke-dashoffset 0.6s ease;
 }
 
@@ -451,7 +481,7 @@ textarea:focus {
     fill: var(--needle-color);
 }
 
-#needle {
+.dial-needle {
     transform-origin: 100px 100px;
     transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.35s ease;
     stroke: var(--needle-color);
@@ -464,12 +494,12 @@ textarea:focus {
     padding-inline: 12px;
 }
 
-#valueText {
+.value-text {
     font-size: 1.55rem;
     font-weight: 700;
 }
 
-#valueCaption {
+.value-caption {
     margin-top: 6px;
     color: var(--text-muted);
     max-width: 28ch;
@@ -601,15 +631,6 @@ body[data-risk='high'] .hero-core {
     }
     100% {
         box-shadow: 0 0 0 0 rgba(219, 108, 53, 0);
-    }
-}
-
-@keyframes pulsePanel {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-2px);
     }
 }
 
