@@ -100,14 +100,55 @@ export function buildAnalysisSummary(analysis) {
 }
 
 export function formatFindings(analysis) {
+  const riskItems = [];
+  const riskLevel = analysis.risk?.level;
+  const riskPercent = analysis.risk?.percentage;
+  const riskReasons = analysis.risk?.reasons || [];
+
+  if (riskLevel) {
+    const suffix = typeof riskPercent === 'number' ? ` (${riskPercent}%)` : '';
+    riskItems.push(`- Level: ${riskLevel}${suffix}`);
+  }
+  riskItems.push(...riskReasons.map((reason) => `- ${reason}`));
+
+  const errorItems = [];
+  if (analysis.debug?.status === 'error') {
+    errorItems.push(`- Runtime error: ${analysis.debug.message || 'Execution failed.'}`);
+  } else if (analysis.debug?.status === 'skipped') {
+    errorItems.push(`- Runtime check: ${analysis.debug.message || 'Skipped.'}`);
+  }
+
+  errorItems.push(
+    ...(analysis.bugs || [])
+      .filter((bug) => bug.type === 'tool_error')
+      .map((bug) => `- Bug detector error: ${bug.message || 'Tool execution failed.'}`),
+  );
+  errorItems.push(
+    ...(analysis.security || [])
+      .filter((issue) => issue.type === 'tool_error')
+      .map((issue) => `- Security analyzer error: ${issue.message || 'Tool execution failed.'}`),
+  );
+
   const sections = [
     {
+      title: 'Risk Summary',
+      items: riskItems,
+    },
+    {
+      title: 'Errors',
+      items: errorItems,
+    },
+    {
       title: 'Bug Warnings',
-      items: (analysis.bugs || []).map((bug) => formatStructuredIssue(bug)),
+      items: (analysis.bugs || [])
+        .filter((bug) => bug.type !== 'tool_error')
+        .map((bug) => formatStructuredIssue(bug)),
     },
     {
       title: 'Security Issues',
-      items: (analysis.security || []).map((issue) => formatStructuredIssue(issue)),
+      items: (analysis.security || [])
+        .filter((issue) => issue.type !== 'tool_error')
+        .map((issue) => formatStructuredIssue(issue)),
     },
     {
       title: 'Anomalies',

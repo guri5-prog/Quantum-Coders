@@ -355,6 +355,27 @@ label {
     box-shadow: 0 0 0 2px var(--accent-soft);
 }
 
+.upload-row {
+    display: grid;
+    gap: 10px;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+.upload-button {
+    width: fit-content;
+    padding: 10px 16px;
+    border-radius: 12px;
+}
+
+.upload-hint {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+    letter-spacing: 0.02em;
+}
+
 .editor-frame {
     border-radius: 24px;
     overflow: hidden;

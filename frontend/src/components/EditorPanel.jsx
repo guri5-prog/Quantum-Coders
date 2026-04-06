@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+
 import BugPercentagePanel from './BugPercentagePanel.jsx';
 
 const LANGUAGE_OPTIONS = [
@@ -13,10 +15,24 @@ function EditorPanel({
   inputCode,
   isLoading,
   language,
+  uploadedFileName,
   onAnalyze,
+  onFileUpload,
   onInputChange,
   onLanguageChange,
 }) {
+  const fileInputRef = useRef(null);
+
+  function handlePickFile() {
+    fileInputRef.current?.click();
+  }
+
+  function handleFileChange(event) {
+    const [file] = event.target.files || [];
+    onFileUpload(file);
+    event.target.value = '';
+  }
+
   return (
     <div className="panel editor-panel reveal">
       <div className="panel-header">
@@ -42,6 +58,29 @@ function EditorPanel({
             </option>
           ))}
         </select>
+
+        <div className="upload-row">
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="file-input-hidden"
+            onChange={handleFileChange}
+            disabled={isLoading}
+          />
+          <button
+            type="button"
+            className="buttons secondary-button upload-button"
+            onClick={handlePickFile}
+            disabled={isLoading}
+          >
+            Upload File
+          </button>
+          <p className="upload-hint">
+            {uploadedFileName
+              ? `Loaded: ${uploadedFileName}`
+              : `Choose a ${LANGUAGE_OPTIONS.find((option) => option.value === language)?.label || 'code'} file.`}
+          </p>
+        </div>
       </div>
 
       <label htmlFor="inputCode">Enter your code below for analysis</label>

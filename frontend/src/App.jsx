@@ -20,6 +20,8 @@ import {
 
 function App() {
   const [inputCode, setInputCode] = useState('');
+  const [language, setLanguage] = useState('python');
+  const [uploadedFileName, setUploadedFileName] = useState('');
   const [isDark, setIsDark] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [bugPercentage, setBugPercentage] = useState(0);
@@ -59,7 +61,7 @@ function App() {
     setSummary((current) => ({ ...current, ...loadingSummary }));
 
     try {
-      const analysis = await requestAnalysis(userCode);
+      const analysis = await requestAnalysis(userCode, language);
       const riskValue = analysis.risk.percentage;
       const bugPercentageValue = calculateBugPercentage(analysis);
 
@@ -77,6 +79,24 @@ function App() {
       handleAnalysisError(error);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleFileUpload(file) {
+    if (!file) {
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      setInputCode(text);
+      setUploadedFileName(file.name);
+      setSummary((current) => ({
+        ...current,
+        valueCaption: `Loaded ${file.name} for ${language.toUpperCase()} analysis.`,
+      }));
+    } catch {
+      alert('Could not read the selected file.');
     }
   }
 
@@ -120,8 +140,12 @@ function App() {
               bugTone={bugTone}
               inputCode={inputCode}
               isLoading={isLoading}
+              language={language}
+              uploadedFileName={uploadedFileName}
               onAnalyze={handleAnalyze}
+              onFileUpload={handleFileUpload}
               onInputChange={setInputCode}
+              onLanguageChange={setLanguage}
             />
 
             <div className="results-column">
