@@ -7,7 +7,7 @@ from ..services.debugger import debug_code
 from ..services.dos_detector import detect_dos
 from ..services.risk_calculator import calculate_risk
 from ..services.security_analyzer import analyze_security
-from ..utils.language_analysis import normalize_language
+from ..utils.language_analysis import detect_mixed_language, normalize_language
 
 router = APIRouter()
 
@@ -31,17 +31,33 @@ def analyze_code(payload: dict):
     results = []
 
     for code, language in zip(codes, languages):
-        bugs = detect_bugs(code, language)
-        security = analyze_security(code, language)
-        anomalies = detect_anomalies(code, language)
-        dos_risk = detect_dos(code, language)
-        debug_result = debug_code(code, language)
-        risk = calculate_risk(bugs, security, anomalies, dos_risk, code, language)
-        fixed_code = generate_fixed_code(code, bugs, security, language)
+        effective_language, language_signals = detect_mixed_language(code, language)
+
+        bugs = detect_bugs(code, effective_language)
+        security = analyze_security(code, effective_language)
+        anomalies = detect_anomalies(code, effective_language)
+        dos_risk = detect_dos(code, effective_language)
+        debug_result = debug_code(code, effective_language)
+        risk = calculate_risk(bugs, security, anomalies, dos_risk, code, effective_language)
+        fixed_code = generate_fixed_code(code, bugs, security, effective_language)
+
+        analysis_notes = []
+        if effective_language == "mixed":
+            analysis_notes.append(
+                "Detected mixed-language syntax in one submission. Results are heuristic and may be less precise."
+            )
+            anomalies.append({
+                "type": "Mixed Language Input",
+                "message": "Multiple language signatures detected. Analyze one language per submission for highest accuracy.",
+                "severity": "MEDIUM",
+            })
 
         results.append({
             "input_code": code,
-            "language": language,
+            "language": effective_language,
+            "requested_language": language,
+            "language_signals": language_signals,
+            "analysis_notes": analysis_notes,
             "bugs": bugs,
             "security": security,
             "anomalies": anomalies,

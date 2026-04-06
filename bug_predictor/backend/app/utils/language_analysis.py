@@ -1,7 +1,7 @@
 import re
 
 
-SUPPORTED_LANGUAGES = {"python", "java", "javascript", "cpp"}
+SUPPORTED_LANGUAGES = {"python", "java", "javascript", "cpp", "mixed"}
 
 
 def normalize_language(language):
@@ -29,6 +29,7 @@ def language_label(language):
         "java": "Java",
         "javascript": "JavaScript",
         "cpp": "C++",
+        "mixed": "Mixed",
     }
     return labels.get(normalized, "Python")
 
@@ -40,7 +41,77 @@ def language_extension(language):
         "java": ".java",
         "javascript": ".js",
         "cpp": ".cpp",
+        "mixed": ".txt",
     }.get(normalized, ".py")
+
+
+def detect_language_signals(code):
+    text = code or ""
+    signals = {
+        "python": 0,
+        "java": 0,
+        "javascript": 0,
+        "cpp": 0,
+    }
+
+    python_patterns = [
+        r"^\s*def\s+\w+\s*\(",
+        r"^\s*import\s+\w+",
+        r"^\s*from\s+\w+\s+import\s+",
+        r"^\s*if\s+__name__\s*==\s*['\"]__main__['\"]",
+        r"^\s*print\s*\(",
+    ]
+    java_patterns = [
+        r"\bpublic\s+class\s+\w+",
+        r"\bpublic\s+static\s+void\s+main\s*\(",
+        r"\bSystem\.out\.println\s*\(",
+        r"\bthrows\s+\w+",
+    ]
+    javascript_patterns = [
+        r"\b(const|let|var)\s+\w+\s*=",
+        r"\bfunction\s+\w+\s*\(",
+        r"\bconsole\.log\s*\(",
+        r"\b=>\s*\{?",
+    ]
+    cpp_patterns = [
+        r"^\s*#include\s*<[^>]+>",
+        r"\bstd::\w+",
+        r"\bint\s+main\s*\(",
+        r"\bcout\s*<<",
+    ]
+
+    for pattern in python_patterns:
+        if re.search(pattern, text, flags=re.MULTILINE):
+            signals["python"] += 1
+    for pattern in java_patterns:
+        if re.search(pattern, text, flags=re.MULTILINE):
+            signals["java"] += 1
+    for pattern in javascript_patterns:
+        if re.search(pattern, text, flags=re.MULTILINE):
+            signals["javascript"] += 1
+    for pattern in cpp_patterns:
+        if re.search(pattern, text, flags=re.MULTILINE):
+            signals["cpp"] += 1
+
+    return signals
+
+
+def detect_mixed_language(code, selected_language):
+    selected = normalize_language(selected_language)
+    if selected == "mixed":
+        return "mixed", detect_language_signals(code)
+
+    signals = detect_language_signals(code)
+    strong_languages = [lang for lang, count in signals.items() if count >= 2]
+    if len(strong_languages) >= 2:
+        return "mixed", signals
+
+    # If selected language has no evidence but two other languages do, treat as mixed.
+    other_languages = [lang for lang, count in signals.items() if lang != selected and count >= 1]
+    if signals.get(selected, 0) == 0 and len(other_languages) >= 2:
+        return "mixed", signals
+
+    return selected, signals
 
 
 def extract_generic_features(code):
@@ -81,7 +152,7 @@ def detect_generic_bugs(code, language):
         "Empty catch block may hide failures",
     )
 
-    if normalized == "javascript":
+    if normalized in {"javascript", "mixed"}:
         _append_pattern_issues(
             issues,
             code,
@@ -90,7 +161,7 @@ def detect_generic_bugs(code, language):
             "prefer-let-const",
             "Use let/const instead of var to avoid scope bugs",
         )
-    elif normalized == "java":
+    if normalized in {"java", "mixed"}:
         _append_pattern_issues(
             issues,
             code,
@@ -99,7 +170,7 @@ def detect_generic_bugs(code, language):
             "debug-print",
             "Debug print statement found in source code",
         )
-    elif normalized == "cpp":
+    if normalized in {"cpp", "mixed"}:
         _append_pattern_issues(
             issues,
             code,
@@ -141,7 +212,7 @@ def detect_generic_security(code, language):
         "Potential hardcoded secret detected",
     )
 
-    if normalized in {"java", "javascript", "cpp"}:
+    if normalized in {"java", "javascript", "cpp", "mixed"}:
         _append_security(
             issues,
             code,
@@ -151,7 +222,7 @@ def detect_generic_security(code, language):
             "Possible SQL injection via string concatenation",
         )
 
-    if normalized == "cpp":
+    if normalized in {"cpp", "mixed"}:
         _append_security(
             issues,
             code,

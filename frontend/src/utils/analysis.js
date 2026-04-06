@@ -131,6 +131,10 @@ export function formatFindings(analysis) {
 
   const sections = [
     {
+      title: 'Analysis Notes',
+      items: (analysis.analysis_notes || []).map((note) => `- ${note}`),
+    },
+    {
       title: 'Risk Summary',
       items: riskItems,
     },

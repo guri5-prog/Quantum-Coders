@@ -104,6 +104,13 @@ def _validate_fixed_code(code: str, language: str):
 
 def generate_fixed_code(code: str, bugs, security, language="python"):
     normalized_language = normalize_language(language)
+    if normalized_language == "mixed":
+        return {
+            "code": "",
+            "status": "unsupported_mixed",
+            "message": "Auto-fix is unavailable for mixed-language submissions. Submit one language at a time.",
+        }
+
     target_language = language_label(normalized_language)
     prompt = f"""
 You are a {target_language} security expert.
